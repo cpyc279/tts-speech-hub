@@ -1,0 +1,153 @@
+spring:
+  application:
+    # 应用名称，用于日志标识与 Spring 上下文展示。
+    name: tts-speech-hub
+  output:
+    ansi:
+      enabled: ALWAYS
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration
+  jackson:
+    default-property-inclusion: non_null
+  data:
+    redis:
+      # Redis 主机地址，驱动缓存与 traceId 复用能力。
+      host: xxx
+      # Redis 端口，连接上面的缓存服务。
+      port: 6379
+      # Redis 密码，项目发布时必须替换为真实凭据。
+      password: xxx
+      timeout: 200ms
+      database: 0
+      connect-timeout: 200ms
+
+logging:
+  file:
+    path: ./logs
+
+server:
+  port: 8080
+
+kaihu:
+  speech:
+    auth:
+      enabled: false
+      timestamp-tolerance-seconds: 300
+      # 全局签名密钥，用于默认验签。
+      global-secret: xxx
+      broker-secrets:
+        # 券商维度签名密钥，用于覆盖默认验签密钥。
+        broker_a: xxx
+        # 券商维度签名密钥，用于覆盖默认验签密钥。
+        broker_b: xxx
+      # 后台缓存管理令牌，用于 admin-token 请求头鉴权。
+      admin-token: xxx
+    tts:
+      max-batch-size: 10
+      max-text-length: 500
+      feign:
+        timeout-ms: 2000
+        retry-max-attempts: 2
+      prepare-executor:
+        core-pool-size: 8
+        max-pool-size: 16
+        queue-capacity: 200
+      synthesize-executor:
+        core-pool-size: 8
+        max-pool-size: 16
+        queue-capacity: 200
+      oss-upload-executor:
+        core-pool-size: 4
+        max-pool-size: 8
+        queue-capacity: 200
+      voice-route:
+        default-model-code: hithink
+        broker-model-code-map:
+          broker_a: hithink
+          broker_b: qwen
+        primary-endpoint-map:
+          hithink: SMALL
+          qwen: LARGE
+        fallback-endpoint-map:
+          hithink: LARGE
+          qwen: SMALL
+      endpoint:
+        # 小模型 TTS 服务地址，用于 Feign 调用下游小模型。
+        small-model-url: xxx
+        # 大模型 TTS 服务地址，用于 Feign 调用下游大模型。
+        large-model-url: xxx
+        # 小模型接口路径，用于拼接小模型请求地址。
+        small-model-path: /ths-tts/v2/get/result
+        # 大模型接口路径，用于拼接大模型请求地址。
+        large-model-path: /hapi/v1/tts/oneshot/public/tts_sync
+        small-model-engine-name: yuexiaohua
+        small-model-form:
+          audio-type: 0
+          pitch: 0
+          volume: 100
+          sampling-rate: 0
+          sample-depth: 16
+          speed: 100
+        # 大模型音色 ID，用于指定下游合成音色。
+        large-model-voice-id: xxx
+        # 下游 TTS 应用 ID，用于供应商接口鉴权。
+        app-id: xxx
+        # 下游 TTS 应用密钥，用于供应商接口鉴权。
+        app-key: xxx
+      cache:
+        base64-ttl-seconds: 604800
+        base64-command-timeout-ms: 500
+        base64-connect-timeout-ms: 200
+        base64-key-prefix: tts:cache:base64
+        url-key-prefix: tts:cache:url
+        base64-index-key-prefix: tts:cache:base64:index
+        base64-max-count-per-broker: 200
+      ssml:
+        speak-start-tag: "<speak>"
+        speak-end-tag: "</speak>"
+      name-tag:
+        name-tag-start-tag: '<say-as interpret-as="name">'
+        name-tag-end-tag: "</say-as>"
+        compatible-name-tag-start-tag-list:
+          - "<say-as interpret-as='name'>"
+          - "<say-as interpret-as=鈥檔ame鈥?>"
+          - "<say-as interpret-as=鈥榥ame鈥?>"
+          - "<say-as interpret-as=name>"
+    ner:
+      # NER 服务地址，用于姓名识别与文本模板命中。
+      url: xxx
+      timeout-ms: 2000
+      path: /api/ner/v1/extract
+      large-model:
+        # 大模型 NER 服务地址，用于优先的人名抽取。
+        url: xxx
+        path: /api/pipeline/v1/chat
+        timeout-ms: 20000
+        # 大模型工作流编号，用于路由到指定流程。
+        pipe-name: xxx
+        mode: WORK_FLOW
+        # 调用方服务名，用于透传到下游请求头。
+        remote-svc: xxx
+        # 调用方 IP，用于透传到下游请求头。
+        remote-ip: xxx
+      template:
+        match-threshold: 2
+        ttl-days: 5
+        max-template-count-per-broker: 200
+    oss:
+      object-prefix: tts/audio
+      append-date-path: true
+
+amazon:
+  s3:
+    # 对象存储桶名，用于保存异步上传后的音频文件。
+    bucket-name: xxx
+    # 对象存储接入地址，用于 AWS S3 SDK 建连。
+    endpoint: xxx
+    # 对象存储公网域名，用于拼接可访问音频 URL。
+    domain: xxx
+    # 对象存储访问 key，用于 SDK 鉴权。
+    access-key: xxx
+    # 对象存储 secret key，用于 SDK 鉴权。
+    secret-key: xxx

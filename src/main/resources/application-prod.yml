@@ -1,0 +1,173 @@
+spring:
+  data:
+    redis:
+      # 生产 Redis 主机地址，用于运行时缓存访问。
+      host: xxx
+      # 生产 Redis 端口，用于运行时缓存访问。
+      port: 6379
+      # 生产 Redis 密码，用于运行时缓存访问。
+      password: xxx
+      timeout: 200ms
+      database: 0
+      connect-timeout: 200ms
+
+kaihu:
+  speech:
+    auth:
+      enabled: true
+      timestamp-tolerance-seconds: 86400
+      # 生产全局签名密钥，用于默认验签。
+      global-secret: xxx
+      # 生产后台缓存管理令牌，用于 admin-token 请求头鉴权。
+      admin-token: xxx
+    tts:
+      max-batch-size: 10
+      max-text-length: 250
+      feign:
+        timeout-ms: 10000
+        retry-max-attempts: 2
+      prepare-executor:
+        core-pool-size: 10
+        max-pool-size: 16
+        queue-capacity: 100
+      synthesize-executor:
+        core-pool-size: 120
+        max-pool-size: 240
+        queue-capacity: 60
+      oss-upload-executor:
+        core-pool-size: 4
+        max-pool-size: 8
+        queue-capacity: 100
+      voice-route:
+        default-model-code: hithink
+        broker-model-code-map:
+          broker_a: hithink
+          broker_b: qwen
+        primary-endpoint-map:
+          hithink: SMALL
+          qwen: LARGE
+        fallback-endpoint-map:
+          hithink: LARGE
+          qwen: SMALL
+      endpoint:
+        # 生产小模型 TTS 服务地址。
+        small-model-url: xxx
+        # 生产大模型 TTS 服务地址。
+        large-model-url: xxx
+        small-model-path: /sys_per_connection/tts/v2/get/result
+        large-model-path: /hapi/v1/tts/oneshot/public/tts_sync
+        small-model-engine-name: yuexiaohua
+        small-model-form:
+          audio-type: 0
+          pitch: 0
+          volume: 100
+          sampling-rate: 0
+          sample-depth: 16
+          speed: 100
+        # 生产大模型音色 ID。
+        large-model-voice-id: xxx
+        # 生产 TTS 应用 ID。
+        app-id: xxx
+        # 生产 TTS 应用密钥。
+        app-key: xxx
+      cache:
+        base64-ttl-seconds: 604800
+        base64-command-timeout-ms: 500
+        base64-connect-timeout-ms: 200
+        base64-key-prefix: tts:cache:base64
+        base64-index-key-prefix: tts:cache:base64:index
+        url-key-prefix: tts:cache:url
+        base64-max-count-per-broker: 10
+      ssml:
+        speak-start-tag: "<speak>"
+        speak-end-tag: "</speak>"
+      name-tag:
+        name-tag-start-tag: '<say-as interpret-as="name">'
+        name-tag-end-tag: "</say-as>"
+        compatible-name-tag-start-tag-list:
+          - "<say-as interpret-as='name'>"
+          - "<say-as interpret-as=鈥檔ame鈥?>"
+          - "<say-as interpret-as=鈥榥ame鈥?>"
+          - "<say-as interpret-as=name>"
+    ner:
+      # 生产 NER 服务地址。
+      url: xxx
+      timeout-ms: 5000
+      path: /api/ner/v1/extract
+      template:
+        match-threshold: 50
+        ttl-days: 5
+        max-template-count-per-broker: 5
+      large-model:
+        # 生产大模型 NER 服务地址。
+        url: xxx
+        path: /api/pipeline/v1/chat
+        timeout-ms: 1500
+        # 生产大模型工作流编号。
+        pipe-name: xxx
+        mode: WORK_FLOW
+        # 生产调用方服务名。
+        remote-svc: xxx
+        # 生产调用方 IP。
+        remote-ip: xxx
+    oss:
+      object-prefix: tts/audio
+      append-date-path: true
+
+amazon:
+  s3:
+    # 生产对象存储桶名。
+    bucket-name: xxx
+    # 生产对象存储接入地址。
+    endpoint: xxx
+    # 生产对象存储公网域名。
+    domain: xxx
+    # 生产对象存储 access key。
+    access-key: xxx
+    # 生产对象存储 secret key。
+    secret-key: xxx
+
+asr:
+  asr-configs:
+    default:
+      asrProviderConfigs:
+        - providerName: aicubes
+          modelName: qwen
+          # ASR 应用 ID，用于语音识别供应商鉴权。
+          app-id: xxx
+          # ASR 应用密钥，用于语音识别供应商鉴权。
+          app-key: xxx
+          path: /wapi/v1/asr/realtime
+          # ASR WebSocket 地址，用于实时识别。
+          url: xxx
+          engineParams:
+            type: 0
+            selfpause: 0
+          params:
+            app_id: xxx
+            userNumber: xxx
+    KAIHU:
+      asrProviderConfigs:
+        - providerName: aicubes
+          modelName: qwen
+          app-id: xxx
+          app-key: xxx
+          path: /wapi/v1/asr/realtime
+          url: xxx
+          engineParams:
+            type: 0
+            selfpause: 0
+          params:
+            app_id: xxx
+            userNumber: xxx
+        - providerName: aicubes
+          modelName: ths
+          app-id: xxx
+          app-key: xxx
+          path: /wapi/v1/asr/realtime
+          url: xxx
+          engineParams:
+            type: 0
+          params:
+            app_id: xxx
+            userNumber: xxx
